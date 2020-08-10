@@ -17,17 +17,17 @@
 
 ** Representação
 Em PG, programas são expressados como árvores sintáticas, ao invés de linhas de código.
-As variáveis e constantes são folhas na árvores. Em PG, elas são chamadas de
+As variáveis e constantes são folhas nas árvores. Em PG, elas são chamadas de
 terminais, enquanto as operações são nós internos chamados funções. O conjunto
 de funções e terminais permitidos formam juntos o grupo de primitivas do sistema.
 Em sistemas mais complexos, programas podem ser compostos de múltiplos componentes.
-Nesse caso, essas outras árvores são chamados de galhos, ligados à um nó raiz.
+Nesse caso, essas outras árvores são chamadas de galhos, ligados à um nó raiz.
 O número e tipo de galhos em um programa formam a arquitetura de um programa.
 
 ** Inicialização da população
 Indivíduos são gerados aleatoriamente. Nesta seção serão introduzidos alguns
 métodos para geração dessa população (full, grow, e Ramped half-and-half).
-Em ambos os métodos full e grow, os individuos são gerados de forma a não
+Em ambos os métodos full e grow, os indivíduos são gerados de forma a não
 ultrapassar uma profundidade especificada. A profundidade de um nó é
 o número de arestas que precisam ser trafegadas para chegar ao nó que começa
 da raiz da árvore (que possui profundidade 0). A profundidade de um árvore é a 
@@ -47,7 +47,7 @@ selecionados de todo o conjunto de primitivas até o limite de profundidade
 ser atingido. Quando este é alcançado, apenas terminais podem ser escolhidos.
 
 Já que nenhum dos dois métodos fornecem uma boa variedade de formas e tamanhos
-por si só, Koza propôs que metade da população inicial seja construida usando full
+por si só, Koza propôs que metade da população inicial seja construída usando full
 e a outra metade, half. Isto é feito usando um range de profundidades,
 que ajudam a assegurar a variedade de formas e tamanhos. Daí o nome ramped half-and-half.
 
@@ -55,7 +55,7 @@ que ajudam a assegurar a variedade de formas e tamanhos. Daí o nome ramped half
 Inicialmente, serão definidas algumas funções que servirão como utilitários para
 a implementação da função de geração.
 Começando pela implementação de uma função que retorna a aridade de determinada 
-função, a qual é específica para cada implementação de lisp. 
+função, a qual é específica para cada implementação de Lisp. 
 Abaixo está a para o SBCL, conforme esse [[https://stackoverflow.com/questions/15465138/find-functions-arity-in-common-lisp][tópico]].
 
 #+HEADER: :tangle "genetic-programming.lisp"
@@ -131,7 +131,7 @@ em  seu fitness para a aplicação dos operadores genéticos. O método utilizad
 seção é o do torneio, mas qualquer outro pode ser utilizado.
 
 No torneio, alguns indivíduos da população são escolhidos aleatoriamente e são
-comparados entre si, sendo que o melhor deles é sselecionado como pai. No crossover,
+comparados entre si, sendo que o melhor deles é selecionado como pai. No crossover,
 dois pais são necessários, logo duas seleções são feitas. Assim, este método não
 se preocupa com quão melhor é o indivíduo escolhido, considerando apenas o fato de
 que ele é melhor. Isto ajuda a manter a pressão de seleção constante.
@@ -249,7 +249,7 @@ aleatoriamente (operação também chamada de headless chicken crossover).
 
 Outra forma comum de crossover é a point mutation, que é a equivalente em PG 
 à mutação de bit-flip, usada em AGs. Em mutação de ponto, um nó é selecionado
-aleatoriamente e a primitiva ali armazenada é subtituida por outra de mesma aridade.
+aleatoriamente e a primitiva ali armazenada é substituída por outra de mesma aridade.
 
 Geralmente, a probabilidade de crossover chega a 90%, enquanto a de mutação
 não costuma passar dos 1%.
@@ -316,11 +316,11 @@ assumem a possibilidade de intervenção em qualquer ponto. Ou seja, é
 necessário que os retornos das funções e os argumentos das mesmas sejam 
 de tipos semelhantes, para que haja essa intercambialidade. Em alguns
 casos, é possível fazer a conversão de tipos, mas esta técnica não é muito
-recomendade, pois introduz polaridades inesperadas à busca. 
+recomendada, pois introduz polaridades inesperadas à busca. 
 
 Isto pode parecer um problema, mas na maioria dos casos uma simples reestruturação
 das funções pode resolver. No caso do if, o qual recebe como primeiro argumento
-uma expressão booleana. É possivel reescrevê-lo para aceitar quatro argumentos,
+uma expressão booleana. É possível reescrevê-lo para aceitar quatro argumentos,
 no caso os dois primeiros fariam a verificação de a < b, por exemplo. 
 
 Uma alternativa para o uso de consistência de tipos é expandir o sistema
@@ -394,13 +394,13 @@ Isto é feito transitando a estrutura recursivamente, e postergando a avaliaçã
 de cada nó até que suas sub-árvores sejam avaliadas. Isto já é 
 feito automaticamente pela função eval, do Common Lisp. 
 
-Ás vezes, é interessante a saida produzida pelo programa. Outras, vezes, 
+Às vezes, é interessante a saída produzida pelo programa. Outras, vezes, 
 dá-se prioridade aos efeitos colaterais. Em ambos os casos, a medida de
 fitness dependem dos resultados produzidos pela execução do programa,
 utilizando várias entradas, ou sobre uma variedade de condições (fitness cases).
 
 Outra propriedade da medição de aptidão em PG é que em vários problemas práticos,
-se refere a uma medição multi-objetivo.
+se refere a uma medição multiobjetivo.
 
 ** Parâmetros da PG
 A quarte etapa especifica os parâmetros de controle da execução.
@@ -433,7 +433,7 @@ algum algoritmo para isto.
 A quinta etapa consiste em especificar o critério de parada (que
 geralmente envolve um número máximo de gerações ou um predicado específico
 para o problem) e o método para designar o resultado da execução (geralmente
-o melhor indivíduo, ou os n Melhores).
+o melhor indivíduo, ou os n melhores).
 
 * Exemplo de execução de Programação Genética
 
@@ -457,14 +457,14 @@ obtidas de um range razoável, no caso -5.0 a +5.0. Portanto, o conjunto termina
 T, é dado por: $$T = {x, R}$$.
 
 A definição do problema não especifica quais operações podem ser feitas.
-Logo, é razoável que apenas os operadores basicos sejam adicionados. Algumas
+Logo, é razoável que apenas os operadores básicos sejam adicionados. Algumas
 outras regressões podem necessitar de pelo menos essas operações, além de outras
 adicionais, como seno ou log. Assim, o conjunto de funções será: 
 $$F = {+, -, *, %}$$
 No qual % é a divisão protegida. 
 
 O terceiro passo envolve construir a medida de fitness. Em alto-nível, este
-problema busca encontrar um programa cuja saída sejam iguais às aquelas 
+problema busca encontrar um programa cuja saída seja igual às aquelas 
 do polinômio $x^{2}+x+1$. Assim, o fitness associado a um indivíduo deve
 representar quão perto ele se aproxima dessa função.
 
@@ -674,3 +674,4 @@ Por fim, o algoritmo como um todo é implementado da seguinte forma:
 	((terminationp population target-error #'<=)
 	 (terminationp population target-error #'<=))))
 #+END_SRC
+
