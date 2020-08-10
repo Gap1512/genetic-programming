@@ -1,0 +1,676 @@
+#+LATEX_HEADER: \RequirePackage{fancyvrb}
+#+LATEX_HEADER: \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small}
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:nil broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:t toc:nil todo:t |:t
+#+TITLE: Notes On [[https://books.google.com.br/books/about/A_Field_Guide_to_Genetic_Programming.html?id=3PBrqNK5fFQC&redir_esc=y#:~:text=Lulu.com%2C%202008%20-%20Computers,what%20needs%20to%20be%20done.][A Field Guide to Genetic Programming]]
+#+AUTHOR: Gustavo Alves Pacheco
+#+EMAIL: gap1512@gmail.com
+#+LANGUAGE: pt-BR
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.3 (Org mode 9.1.9)
+
+* Representação, inicialização e operações em PGs baseados em árvores
+
+** Representação
+Em PG, programas são expressados como árvores sintáticas, ao invés de linhas de código.
+As variáveis e constantes são folhas na árvoores. Em PG, elas são chamadas de
+terminais, enquanto as operações são nós internos chamados funções. O conjunto
+de funções e terminais permitidos formam juntos o grupo de primitivas do sistema.
+Em sistemas mais complexos, programas podem ser compostos de múltiplos componentes.
+Nesse caso, essas outras árvores são chamados de galhos, ligados à um nó raiz.
+O número e tipo de galhos em um programa formam a arquitetura de um programa.
+
+** Inicialização da população
+Indivíduos são gerados aleatoriamente. Nesta seção serão introduzidos alguns
+métodos para geração dessa população (full, grow, e Ramped half-and-half).
+Em ambos os métodos full e grow, os individuos são gerados de forma a não
+ultrapassar uma profundidade especificada. A profundidade de um nó é
+o número de arestas que precisam ser trafegadas para chegar ao nó que começa
+da raiz da árvore (que possui profundidade 0). A profundidade de um árvore é a 
+profundidade da folha com maior profundidade.
+
+No método full (que gera árvores completas, com folhas na mesma profundidade) os 
+nós são escolhidos aleatoriamente do conjunto de funções até q a profundidade
+máxima seja atingida. A partir daí, apenas terminais podem ser escolhidos. 
+Mesmo que este método gere árvores nas quais todas as folhas estejam na mesma
+profundidade, isto não quer dizer q todas as árvores iniciais terão o mesmo número
+de nós. Na verdade, isto só acontece quando todas as funções no conjunto de 
+primitivas tem aridades iguais. Mesmo com aridades diferentes, a possibilidade
+de programas e formas produzidas pelo método é bem limitado.
+
+O método grow, pelo contrário, permite criação de árvores variadas. Nós são 
+selecionados de todo o conjunto de primitivas até o limite de profundidade
+ser atingido. Quando este é alcançado, apenas terminais podem ser escolhidos.
+
+Já que nenhum dos dois métodos fornecem uma boa variedade de formas e tamanhos
+por si só, Koza propôs que metade da população inicial seja construida usando full
+e a outra metade, half. Isto é feito usando um range de profundidades,
+que ajudam a assegurar a variedade de formas e tamanhos. Daí o nome ramped half-and-half.
+
+*** Implementação dos métodos full e grow
+Inicialmente, serão definidas algumas funções que servirão como utilitários para
+a implementação da função de geração.
+Começando pela implementação de uma função que retorna a aridade de determinada 
+função, a qual é específica para cada implementação de lisp. 
+Abaixo está a para o SBCL, conforme esse [[https://stackoverflow.com/questions/15465138/find-functions-arity-in-common-lisp][tópico]].
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (in-package :genetic-programming)
+
+  (defun arity (fn)
+    (let ((arglist (sb-introspect:function-lambda-list fn)))
+      (if (intersection arglist lambda-list-keywords)
+	  (error "~S lambda list ~S contains keywords" fn arglist)
+	  (length arglist))))
+#+END_SRC
+
+Algumas primitivas, como +, -, * e /, que são essenciais para a realização de testes,
+possuem palavras chaves em suas listas de parâmetros. Portanto, definem-se
+algumas funções para teste, com aridade conhecida.
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (defun +/2 (a b) (+ a b))
+  (defun -/2 (a b) (- a b))
+  (defun */2 (a b) (* a b))
+  (defun % (number &rest more-numbers)
+    (cond ((some #'zerop more-numbers) 1)
+	  (more-numbers (apply #'/ (cons number more-numbers)))
+	  (t (/ number))))
+  (defun %/2 (a b) (% a b))
+#+END_SRC
+
+Assim, é possível definir a função de geração das expressões, da seguinte
+forma:
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (defun generate-random-expression (function-set terminal-set max-depth method 
+				     &optional grow-rate)
+    (let* ((fn-set-l (length function-set))
+	   (t-set-l (length terminal-set))
+	   (grow-p (or grow-rate (/ t-set-l (+ t-set-l fn-set-l)))))
+      (labels ((rec (actual-depth result-expression)
+		 (if (or (zerop actual-depth) (and (eql method :grow)
+						   (< (/ (random 1000) 1000)
+						      grow-p)))
+		     (let ((sym (nth (random t-set-l) terminal-set)))
+		       (if (listp sym)
+			   (random-bet sym)
+			   sym))
+		     (let ((rnd-function (nth (random fn-set-l) function-set)))
+		       (append (cons rnd-function
+				     (do ((i 0 (1+ i))
+					  expr)
+					 ((= i (arity rnd-function)) 
+					  (nreverse expr))
+				       (push (rec (1- actual-depth) nil) expr)))
+			       result-expression)))))
+	(rec max-depth nil))))
+
+  (defun random-bet (range)
+    (destructuring-bind (min max precision) range
+      (when (> max min)
+	(let ((scale (round (% 1 precision))))
+	  (+ (/ (random (* scale (- max min))) scale) min)))))
+#+END_SRC
+
+
+Percebe-se que o método grow é muito dependente do tamanho dos conjuntos. 
+Quase sempre irá gerar uma expressão relativamente simples, ou semelhante à
+gerada pelo método full.
+
+** Seleção 
+Assim como outros algoritmos evolucionários, a PG seleciona indivíduos baseados
+em  seu fitness para a aplicação dos operadores genéticos. O método utilizado nessa
+seção é o do torneio, mas qualquer outro pode ser utilizado.
+
+No torneio, alguns indivíduos da população são escolhidos aleatoriamente e são
+comparados entre si, sendo que o melhor deles é sselecionado como pai. No crossover,
+dois pais são necessários, logo duas seleções são feitas. Assim, este método não
+se preocupa com quão melhor é o indivíduo escolhido, considerando apenas o fato de
+que ele é melhor. Isto ajuda a manter a pressão de seleção constante.
+
+Desta forma, um indivíduo extraordinariamente bom não pode imediatamente tomar controle
+da população. Se isto acontecesse, haveria uma perda rápida na diversidade.
+
+Abaixo está implementado uma função de seleção do tipo torneio.
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (defun tournament (list k &optional (fitness #'eval) (order #'>))
+    (car (select-best 1 (select-random k list) order fitness)))
+
+  (defun select-random (n list)
+    (let ((l (length list)))
+      (loop for i from 1 to n collecting (nth (random l) list))))
+
+  (defun select-best (n list predicate key)
+    (when (not (or (zerop n) (null list)))
+      (subseq (sort (copy-seq list) predicate :key key) 0 n)))
+#+END_SRC
+
+#+RESULTS:
+: SELECT-BEST
+
+** Recombinação e mutação
+PG se distanciam consideravelmente dos outros algoritmo evolucionários no 
+que diz respeito à crossover e mutação. A forma mais comum de crossover utilizada é
+o subtree crossover. 
+Dados dois pais, o crossover de sub-árvore escolhe um ponto (nó)
+aleatoriamente, independente em cada pai. Então, o offspring é criado ao substituir
+a sub-árvore que começa no ponto escolhido no pai 1 por uma cópia da sub-árvore
+que começa no pai 2.
+
+#+BEGIN_EXAMPLE lisp
+  ;pai 1:
+  (+ (+ x y) 3)
+  ;---|-------
+  ;pai 2:
+  (* (+ y 1) (/ x 2))
+  ;-----------|-----
+  ;offspring
+  (+ (/ x 2) 3)
+#+END_EXAMPLE
+
+Vale notar q é possível definir uma versão do crossover que retorna dois filhos,
+mas isto não é muito utilizado.
+
+A implementação do crossover será feita da seguinte forma:
+Inicialmente, é preciso definir duas funções utilitárias. A primeira, flat-length,
+que retorna quantos nós a estrutura possui, para que o ponto seja gerado corretamente.
+A segunda, flat-nth, que retorna o enésimo nó da estrutura. Além disso,
+flat-nth é setf-able, indicando que é possível fazer a troca entre as sub-árvores
+de uma forma simples
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (defun flat-length (tree)
+    (labels ((rec (tree acc)
+	       (if (atom tree)
+		   (1+ acc)
+		   (+ acc (rec (car tree) 0)
+		      (if (cdr tree) (rec (cdr tree) 0) 0)))))
+      (rec tree 0)))
+
+  (defun flat-nth (n tree)
+    (labels ((rec (n tree)
+	       (cond
+		 ((null tree) (values n nil))
+		 ((<= n 0) (values n (car tree)))
+		 ((atom (car tree)) (rec (1- n) (cdr tree)))
+		 (t (multiple-value-bind (a l)
+			(rec n (car tree))
+		      (if l (values a l)
+			  (rec a (cdr tree))))))))
+      (nth-value 1 (rec n (list tree)))))
+
+  (defsetf flat-nth (n tree) (new-tree)
+    `(flat-replacnth ,new-tree ,n ,tree))
+
+  (defun flat-replacnth (new-tree n tree)
+    (labels ((rec (tree acc)
+	       (cond
+		 ((null tree) (values nil acc))
+		 ((= acc n) (values (cons new-tree (cdr tree)) (1+ acc)))
+		 ((atom tree) (values tree (1+ acc)))
+		 (t (multiple-value-bind (sub x)
+			(rec (car tree) acc)
+		      (multiple-value-bind (sub-cdr x-cdr)
+			  (rec (cdr tree) x)
+			(values (cons sub sub-cdr) x-cdr)))))))
+      (car (rec (list tree) 0))))
+#+END_SRC
+
+É bom notar que o setf do flat-nth não é 
+destrutivo, diferente do convencional. Dessa forma não é necessário 
+realizar cópias do pai 1, visto que este não será alterado.
+Utilizando essas funções auxiliares, o subtree crossover seria implementado da
+seguinte forma:
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (defun subtree-crossover (parent-1 parent-2)
+    (setf (flat-nth (random (flat-length parent-1)) parent-1)
+	  (flat-nth (random (flat-length parent-2)) parent-2))
+    parent-1)
+#+END_SRC
+
+Para a mutação, a mais comum é a chamada subtree mutation. Nela, um ponto é escolhido
+aleatoriamente na árvore. A sub-árvore que possui como raiz o nó escolhido
+é substituída por uma nova, gerada aleatoriamente. Esta mutação é 
+implementada em alguns casos como um crossover entre um pai e um indivíduo gerado
+aleatoriamente (operação também chamada de headless chicken crossover).
+
+Outra forma comum de crossover é a point mutation, que é a equivalente em PG 
+à mutação de bit-flip, usada em AGs. Em mutação de ponto, um nó é selecionado
+aleatoriamente e a primitiva ali armazenada é subtituida por outra de mesma aridade.
+
+Geralmente, a probabilidade de crossover chega a 90%, enquanto a de mutação
+não costuma passar dos 1%.
+
+A mutação de sub-árvore está implementada abaixo.
+
+#+HEADER: :tangle "genetic-programming.lisp"
+#+BEGIN_SRC lisp
+  (defun subtree-mutation (parent function-set terminal-set
+			   max-depth method &optional grow-rate)
+    (subtree-crossover parent (generate-random-expression function-set
+							  terminal-set
+							  max-depth method
+							  grow-rate)))
+#+END_SRC
+
+* Se preparando para rodar Programação Genética
+
+Para aplicar um sistema de PG a um problema, algumas decisões precisam ser tomadas.
+Estes são conhecidos como passos preparatórios. As escolhas principais são:
+1- O que é o conjunto de terminais?
+2- O que é o conjunto de funções?
+3- O que é a medida do fitness?
+4- Quais parâmetros serão usados para controlar a execução?
+5- Qual será o critério de encerramento e qual será o resultado da execução?
+
+** Conjunto de terminais
+Enquanto é comum descrever PG como evolução de programas, estes programas
+por sua vez não são muito parecidos com os convencionais, usados para
+desenvolvimento de software. As duas etapas iniciais de preparação definem a
+linguagem disponível a PG. 
+
+Um conjunto de terminais consiste em:
+- As entradas externas do programa
+- Funções de aridade zero
+- Constantes
+
+Adicionar uma primitiva como o random pode causar um programa executar de forma 
+diferente toda vez que é chamado. Isto pode ser o desejado, em alguns casos.
+Entretanto, na maioria das vezes, deseja-se a geração de algumas constantes
+aleatórias apenas no processo de inicialização. Isto é geralmente alcançado
+ao introduzir um terminal conhecido como um ephemeral random constant.
+Toda vez q este terminal é escolhido na construção da árvore inicial, 
+um valor aleatório diferente é gerado, que ficará fixo pelo restante da execução.
+
+** Conjunto de funções
+O conjunto de funções usadas em uma PG depende da natureza do problema a ser
+resolvido. Em um problema numérico, o conjunto de funções pode consistir em 
+funções aritméticas, por exemplo. Entretanto, qualquer tipo de função encontrados
+em programas de computadores podem ser usados. São exemplos:
+1- Aritméticas: +, -, *, /
+2- Matemáticas: sin, cos, exp
+3- Booleanas: and, or, not
+4- Condicionais: if-then-else
+5- Iteradores: loop, do
+
+*** Closure
+Para que uma PG funcione corretamente, a maioria dos conjuntos de funções 
+necessitam de uma propriedade chamada closure, que pode ser
+dividida em consistência de tipos e segurança de avaliação.
+
+Consistência de tipos deve acontecer pois os operadores genéticos
+assumem a possibilidade de intervenção em qualquer ponto. Ou seja, é
+necessário que os retornos das funções e os argumentos das mesmas sejam 
+de tipos semelhantes, para que haja essa intercambialidade. Em alguns
+casos, é possível fazer a conversão de tipos, mas esta técnica não é muito
+recomendade, pois introduz polaridades inesperadas à busca. 
+
+Isto pode parecer um problema, mas na maioria dos casos uma simples reestruturação
+das funções pode resolver. No caso do if, o qual recebe como primeiro argumento
+uma expressão booleana. É possivel reescrevê-lo para aceitar quatro argumentos,
+no caso os dois primeiros fariam a verificação de a < b, por exemplo. 
+
+Uma alternativa para o uso de consistência de tipos é expandir o sistema
+de PG, para que os operadores genéticos introduzam apenas código que retorne 
+o mesmo tipo de valor que aquele retirado.
+
+A outra componente das closures é a segurança de avaliação. Isto é necessário
+já que muitas funções podem falhar em tempo de execução. Uma expressão pode tentar
+realizar uma divisão por zero, ou algo do tipo. Isto é solucionado modificando o 
+comportamento das primitivas. Geralmente, são utilizadas versões protegidas de 
+funções numéricas, que poderiam gerar exceções (divisão, logaritmo, exponencial
+e raiz quadrada). 
+
+Outra alternativa é encapsular o tempo de execução e penalizar gravemente
+programas que gerem erros. Isto acarreta a geração de várias
+expressões com erro, com fitness geral baixo. 
+
+Outro erro em tempo de execução envolve overflow. Em algumas implementações
+isto já é tratado automaticamente. Caso isto ocorra, é necessário 
+incluir verificações para registrar tais exceções. 
+
+*** Suficiência
+Existe mais uma propriedade que os conjuntos de primitivas devem ter: suficiência.
+Isto quer dizer que deve ser possível expressar uma solução em termos dos 
+elementos usados como primitivas. Infelizmente, suficiência só pode
+ser garantida para problemas conhecidos, que já tenham essa informação.
+
+Por exemplo, o conjunto {and, or, not, x1, x2, ..., xn} é suficiente
+par a todos os problemas de indução booleana. Já o conjunto 
+{+, -, *, /, x, 0, 1, 2} é incapaz de representar todas as funções transcendentes.
+A função exp(x) é transcendente, e não é capaz de ser escrita de forma racional,
+então não pode ser representada exatamente pelo conjunto acima. Quando o conjunto
+é insuficiente, PG é capaz de desenvolver apenas aproximações. Felizmente, em
+vários casos essas aproximações são boas o suficiente para o propósito do 
+usuário. 
+
+A adição de primitivas desnecessárias para tentar providenciar suficiência não
+tende a diminuir a eficiência da PG, mas as vezes pode levar a conversão do 
+sistema a caminhos inesperados.
+
+*** Evoluindo estruturas além de programas
+Existem muitos problemas os quais as soluções não podem ser escritas como programas
+de computadores. Problemas de design, por exemplo. Nesses casos, existe
+um truque para o funcionamento de PG. O conjunto de primitivas é selecionado
+de tal maneira que os programas evoluídos construam soluções para o problema.
+
+** Função de aptidão
+Os dois primeiros passos definiram o espaço de busca que a PG pode explorar. 
+Ou seja, todos os programas que podem ser criados a partir da combinação de 
+primitivas. Até agora, não se sabe quais regiões do espaço de busca apresentam
+soluções viáveis ao problema. Para isto, utiliza-se a medida de fitness,
+que é o mecanismo primário para definição do problema em alto-nível. 
+
+Fitness pode ser medido de várias formas. Por exemplo, em termos de erro 
+entre a saída desejada e a que o programa está gerando, 
+a quantidade de tempo (recursos) para levar um sistema a determinado estado, 
+a precisão de um programa em reconhecer padrões, o payoff em um sistema de
+jogos ou a conformidade com as especificações do usuário. 
+
+Diferente dos algoritmos evolucionários convencionais, os indivíduos na PG
+são programas, os quais geralmente devem ser executados (mais de uma vez) para 
+definir algum tipo de aptidão. 
+
+Apesar de ser possível compilar os programas gerados pela PG, isto é 
+extremamente eficaz, sendo muito mais comum a utilização de um interpretador 
+para realizar a avaliação dos programas avaliados. 
+
+Isto significa executar os nós de uma árvore em uma ordem que garante
+que os nós sejam executados apenas após a execução de todos os seus argumentos.
+Isto é feito transitando a estrutura recursivamente, e postergando a avaliação
+de cada nó até que suas sub-árvores sejam avaliadas. Isto já é 
+feito automaticamente pela função eval, do Common Lisp. 
+
+Ás vezes, é interessante a saida produzida pelo programa. Outras, vezes, 
+dá-se prioridade aos efeitos colaterais. Em ambos os casos, a medida de
+fitness dependem dos resultados produzidos pela execução do programa,
+utilizando várias entradas, ou sobre uma variedade de condições (fitness cases).
+
+Outra propriedade da medição de aptidão em PG é que em vários problemas práticos,
+se refere a uma medição multi-objetivo.
+
+** Parâmetros da PG
+A quarte etapa especifica os parâmetros de controle da execução.
+O mais importante é o tamanho da população. Outros parâmetros se referem às
+probabilidades de executar os operadores genéticos, o tamanho máximo dos
+programas e outros detalhes da execução.
+Não é possível recomendar valores ótimos para os parâmetros, mas comumente
+são utilizados os seguintes:
+
+A população inicial é gerada utilizando ramped half-and-half com uma variação
+de profundidade indo de 2 a 6. Tradicionalmente, 90% dos filhos são criados
+por crossover de sub-árvore. Entretanto, uma mistura de 50-50 entre crossover
+e várias técnicas de mutação também parecem ser eficazes. 
+
+A limitação do tamanho da população está relacionada ao tempo para avaliar o
+fitness, e não o espaço de armazenamento das estruturas. Como regra, é
+preferível utilizar o maior tamanho de população possível, sendo pelo menos
+500. Uma aproximação inicial de tempo de execução pode ser estimada
+pelo produto entre o número de execuções, o número de gerações, o tamanho
+da população, o tamanho médio dos programas e o número de fitness cases.
+
+Normalmente, o número de gerações vai de 10 a 50, pois é quando acontece a maior 
+parte das convergências. Algumas vezes, o número de fitness cases é limitado
+pela quantidade de dados disponíveis para treinamento. Nesse caso, 
+a função de aptidão deve utilizar tudo o que está disponível. Já em
+outros casos, é melhor reduzir o tamanho do conjunto de treinamento, utilizando
+algum algoritmo para isto. 
+
+** Encerramento e design da solução
+A quinta etapa consiste em especificar o critério de parada (que
+geralmente envolve um número máximo de gerações ou um predicado específico
+para o problem) e o método para designar o resultado da execução (geralmente
+o melhor indivíduo, ou os n Melhores).
+
+* Exemplo de execução de Programação Genética
+
+Nesta seção, será seguido um exemplo, no qual uma PG buscará evoluir
+uma expressão cujo valor corresponda a função quadrática $$x^{2}+x+1$$ entre
+[-1, 1]. O processo de criar mecanicamente um programa de computador que ajusta 
+um grupo de dados é chamado de identificação de sistema, ou regressão simbólica.
+Começando pelos cinco passos preparatórios:
+
+#+HEADER: :exports none :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (in-package :genetic-programming)
+#+END_SRC
+
+** Passos preparatórios
+Nos dois primeiros passos, é escolhido o conjunto de ingredientes sobre
+o qual a PG trabalha. Já que o problema é encontrar uma função matemática
+de uma variável independente, x, a mesma deve estar presente no conjunto
+de terminais. Este conjunto também inclui constantes efêmeras aleatórias,
+obtidas de um range razoável, no caso -5.0 a +5.0. Portanto, o conjunto terminal,
+T, é dado por: $$T = {x, R}$$.
+
+A definição do problema não especifica quais operações podem ser feitas.
+Logo, é razoável que apenas os operadores basicos sejam adicionados. Algumas
+outras regressões podem necessitar de pelo menos essas operações, além de outras
+adicionais, como seno ou log. Assim, o conjunto de funções será: 
+$$F = {+, -, *, %}$$
+No qual % é a divisão protegida. 
+
+O terceiro passo envolve construir a medida de fitness. Em alto-nível, este
+problema busca encontrar um programa cuja saída sejam iguais às aquelas 
+do polinômio $x^{2}+x+1$. Assim, o fitness associado a um indivíduo deve
+representar quão perto ele se aproxima dessa função.
+
+Em princípio, poderia ser calculada a integral de diferença entre a função
+evoluída e a alvo. Entretanto, para a maioria dos problemas de regressão simbólica,
+essa estratégia é inviável. Assim, é comum definir o fitness como a soma dos erros
+absolutos, medidos em diferentes valores na variável independente x, entre [-1.0, +1.0].
+Em particular, serão medidos os valores do erros para x pertencendo a 
+{-1.0, -0.9, ..., 0.9, 1.0}. Quanto menor o valor do fitness, melhor, sendo
+0 a regressão perfeita. Com essa definição, o fitness definido é aproximadamente
+proporcional à área entre as duas curvas.
+
+O quarto passo define os parâmetros de execução. A população neste
+exemplo será pequena, com apenas quatro indivíduos. O crossover será 
+responsável por constituir 50% da população. As operações de reprodução (elitismo)
+e mutação serão usadas para gerar os outros 50%, sendo 25% cada. 
+Operações de alteração de arquitetura serão responsáveis pelos outros 1%. 
+
+Na última etapa, é necessário estabelecer a condição de parada. Nesse exemplo,
+a execução continuará até que até que um indivíduo alcance fitness menor que 0.1.
+
+** Execução passo a passo.
+*** Inicialização
+Inicialmente, uma população de quatro indivíduos é criada, optou-se por
+implementar uma classe que representa os programas:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defclass program ()
+    ((params :initarg :params
+	     :accessor params)
+     (expression :initarg :expression
+		 :accessor expression)
+     (fitness :initform 0 :accessor fitness)))
+#+END_SRC
+
+Sendo necessário implementar a função =generate-random-program= para gerar
+objetos dessa classe:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defun generate-random-program (function-set terminal-set max-depth method
+				  min max step objective
+				  &optional grow-rate)
+    (let ((p (make-instance 'program
+			    :params (filter-symbols terminal-set)
+			    :expression (generate-random-expression function-set
+								    terminal-set
+								    max-depth
+								    method
+								    grow-rate))))
+      (update-fitness p min max step objective)
+      p))
+
+
+  (defun filter-symbols (list)
+    (remove-if-not #'symbolp list))
+#+END_SRC
+
+Assim, a população inicial é gerada da forma:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defun generate-initial-population (size function-set terminal-set
+				      depth method 
+				      min max step objective
+				      &optional grow-rate)
+    (do ((i size (1- i))
+	 result)
+	((zerop i) result)
+      (push (generate-random-program function-set terminal-set
+				     (random-bet depth)
+				     (if (eq method :ramped)
+					 (if (evenp i) :grow :full)
+					 method)
+				     min max step objective grow-rate) 
+	    result)))
+#+END_SRC
+
+Modificando o método =print-object= para facilitar a visualização:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defmethod print-object ((obj program) stream)
+    (print-unreadable-object (obj stream :type t)
+      (format stream "(~{~a~^ ~})~%~2t~a" (params obj) (expression obj))))
+#+END_SRC
+
+*** Avaliação de Aptidão
+Em seguida, a aptidão de cada um deve ser medida. Primeiramente, deve-se 
+transformar o objeto da classe programa em um código executável. Isto
+é feito da seguinte forma:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defmethod runnable-program ((p program))
+    (eval `(lambda ,(slot-value p 'params)
+	     ,@(mapcar #'(lambda (var)
+			  `(declare (ignorable ,var)))
+		      (slot-value p 'params))
+	     ,(slot-value p 'expression))))
+#+END_SRC
+
+A seguir, a função de aptidão é implementada. Nela, o programa executável é
+aplicado a todos os valores entre min e max, incrementando por step e a diferença
+entre o objetivo é calculada.
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defmethod update-fitness ((p program) min max step objective)
+    (let ((fn (runnable-program p)))
+      (with-slots (fitness) p
+	(setf fitness
+	      (loop for i from min to max by step
+		 summing (abs (- (funcall fn i)
+				 (funcall objective i)))
+		 into deviation
+		 finally (return deviation))))))
+#+END_SRC
+
+*** Seleção, Crossover e Mutação
+Depois que o fitness de cada indivíduo é atribuído, é necessário
+escolher os melhores programas para atuarem como os pais na próxima geração.
+Será utilizado o método do torneio, já implementado.
+A composição da nova população será da forma:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+    (defun new-population (prog-list k r-rate c-rate m-rate
+			   function-set terminal-set depth method
+			   min max step objective
+			   &optional grow-rate)
+      (labels ((fn () (tournament prog-list k #'fitness #'<)))
+	(do* ((lt (length prog-list))
+	      (i 0 (1+ i))
+	      (rep (* lt r-rate) (1- rep))
+	      (cro (* lt c-rate) (1- cro))
+	      (mut (* lt m-rate) (1- mut))
+	      result)
+	     ((= i lt) result)
+	  (when (> rep 0) (push (fn) result))
+	  (when (> cro 0) (push (program-crossover (fn) (fn) min max step objective)
+				result))
+	  (when (> mut 0) (push
+			   (program-mutation (fn)
+					     function-set terminal-set
+					     (random-bet depth)
+					     method
+					     min max step objective grow-rate)
+			   result)))))
+
+    (defun program-crossover (program-1 program-2 min max step objective)
+      (let ((p (make-instance 'program :params (remove-duplicates
+						(append (params program-2)
+							(params program-1)))
+			      :expression
+			      (flat-replacnth
+			       (flat-nth (random (flat-length 
+						  (expression program-2)))
+					 (expression program-2))
+			       (random (flat-length (expression program-1)))
+			       (expression program-1)))))
+	(update-fitness p min max step objective)
+	p))
+
+    (defun program-mutation (parent function-set terminal-set
+			     max-depth method
+			     min max step objective &optional grow-rate)
+      (program-crossover parent (generate-random-program function-set
+							 terminal-set
+							 max-depth method
+							 min max step objective
+							 grow-rate)
+			 min max step objective))
+#+END_SRC
+
+*** Encerramento
+O fim da execução ocorrerá quando o fitness do melhor indivíduo for menor que
+um valor específico. Logo:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defun terminationp (prog-list target &optional (order #'<=))
+    (find-if #'(lambda (item)
+		 (funcall order item target))
+	     prog-list :key #'fitness))
+#+END_SRC
+
+*** Montagem
+Por fim, o algoritmo como um todo é implementado da seguinte forma:
+
+#+HEADER: :tangle "symbolic-regression.lisp"
+#+BEGIN_SRC lisp
+  (defun symbolic-regression (size tournament-k r-rate c-rate m-rate
+			      function-set terminal-set depth method
+			      objective target-error min max step
+			      &optional grow-rate)
+    (do ((population (generate-initial-population size function-set
+						  terminal-set depth
+						  method min max step objective
+						  grow-rate)
+		     (new-population population tournament-k
+				     r-rate c-rate m-rate
+				     function-set terminal-set
+				     depth method 
+				     min max step objective grow-rate)))
+	((terminationp population target-error #'<=)
+	 (terminationp population target-error #'<=))))
+#+END_SRC
