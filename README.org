@@ -13,50 +13,50 @@
 #+EXCLUDE_TAGS: noexport
 #+CREATOR: Emacs 26.3 (Org mode 9.1.9)
 
-* RepresentaÁ„o, inicializaÁ„o e operaÁıes em PGs baseados em ·rvores
+* Representa√ß√£o, inicializa√ß√£o e opera√ß√µes em PGs baseados em √°rvores
 
-** RepresentaÁ„o
-Em PG, programas s„o expressados como ·rvores sint·ticas, ao invÈs de linhas de cÛdigo.
-As vari·veis e constantes s„o folhas na ·rvoores. Em PG, elas s„o chamadas de
-terminais, enquanto as operaÁıes s„o nÛs internos chamados funÁıes. O conjunto
-de funÁıes e terminais permitidos formam juntos o grupo de primitivas do sistema.
-Em sistemas mais complexos, programas podem ser compostos de m˙ltiplos componentes.
-Nesse caso, essas outras ·rvores s„o chamados de galhos, ligados ‡ um nÛ raiz.
-O n˙mero e tipo de galhos em um programa formam a arquitetura de um programa.
+** Representa√ß√£o
+Em PG, programas s√£o expressados como √°rvores sint√°ticas, ao inv√©s de linhas de c√≥digo.
+As vari√°veis e constantes s√£o folhas na √°rvores. Em PG, elas s√£o chamadas de
+terminais, enquanto as opera√ß√µes s√£o n√≥s internos chamados fun√ß√µes. O conjunto
+de fun√ß√µes e terminais permitidos formam juntos o grupo de primitivas do sistema.
+Em sistemas mais complexos, programas podem ser compostos de m√∫ltiplos componentes.
+Nesse caso, essas outras √°rvores s√£o chamados de galhos, ligados √† um n√≥ raiz.
+O n√∫mero e tipo de galhos em um programa formam a arquitetura de um programa.
 
-** InicializaÁ„o da populaÁ„o
-IndivÌduos s„o gerados aleatoriamente. Nesta seÁ„o ser„o introduzidos alguns
-mÈtodos para geraÁ„o dessa populaÁ„o (full, grow, e Ramped half-and-half).
-Em ambos os mÈtodos full e grow, os individuos s„o gerados de forma a n„o
-ultrapassar uma profundidade especificada. A profundidade de um nÛ È
-o n˙mero de arestas que precisam ser trafegadas para chegar ao nÛ que comeÁa
-da raiz da ·rvore (que possui profundidade 0). A profundidade de um ·rvore È a 
+** Inicializa√ß√£o da popula√ß√£o
+Indiv√≠duos s√£o gerados aleatoriamente. Nesta se√ß√£o ser√£o introduzidos alguns
+m√©todos para gera√ß√£o dessa popula√ß√£o (full, grow, e Ramped half-and-half).
+Em ambos os m√©todos full e grow, os individuos s√£o gerados de forma a n√£o
+ultrapassar uma profundidade especificada. A profundidade de um n√≥ √©
+o n√∫mero de arestas que precisam ser trafegadas para chegar ao n√≥ que come√ßa
+da raiz da √°rvore (que possui profundidade 0). A profundidade de um √°rvore √© a 
 profundidade da folha com maior profundidade.
 
-No mÈtodo full (que gera ·rvores completas, com folhas na mesma profundidade) os 
-nÛs s„o escolhidos aleatoriamente do conjunto de funÁıes atÈ q a profundidade
-m·xima seja atingida. A partir daÌ, apenas terminais podem ser escolhidos. 
-Mesmo que este mÈtodo gere ·rvores nas quais todas as folhas estejam na mesma
-profundidade, isto n„o quer dizer q todas as ·rvores iniciais ter„o o mesmo n˙mero
-de nÛs. Na verdade, isto sÛ acontece quando todas as funÁıes no conjunto de 
+No m√©todo full (que gera √°rvores completas, com folhas na mesma profundidade) os 
+n√≥s s√£o escolhidos aleatoriamente do conjunto de fun√ß√µes at√© q a profundidade
+m√°xima seja atingida. A partir da√≠, apenas terminais podem ser escolhidos. 
+Mesmo que este m√©todo gere √°rvores nas quais todas as folhas estejam na mesma
+profundidade, isto n√£o quer dizer q todas as √°rvores iniciais ter√£o o mesmo n√∫mero
+de n√≥s. Na verdade, isto s√≥ acontece quando todas as fun√ß√µes no conjunto de 
 primitivas tem aridades iguais. Mesmo com aridades diferentes, a possibilidade
-de programas e formas produzidas pelo mÈtodo È bem limitado.
+de programas e formas produzidas pelo m√©todo √© bem limitado.
 
-O mÈtodo grow, pelo contr·rio, permite criaÁ„o de ·rvores variadas. NÛs s„o 
-selecionados de todo o conjunto de primitivas atÈ o limite de profundidade
-ser atingido. Quando este È alcanÁado, apenas terminais podem ser escolhidos.
+O m√©todo grow, pelo contr√°rio, permite cria√ß√£o de √°rvores variadas. N√≥s s√£o 
+selecionados de todo o conjunto de primitivas at√© o limite de profundidade
+ser atingido. Quando este √© alcan√ßado, apenas terminais podem ser escolhidos.
 
-J· que nenhum dos dois mÈtodos fornecem uma boa variedade de formas e tamanhos
-por si sÛ, Koza propÙs que metade da populaÁ„o inicial seja construida usando full
-e a outra metade, half. Isto È feito usando um range de profundidades,
-que ajudam a assegurar a variedade de formas e tamanhos. DaÌ o nome ramped half-and-half.
+J√° que nenhum dos dois m√©todos fornecem uma boa variedade de formas e tamanhos
+por si s√≥, Koza prop√¥s que metade da popula√ß√£o inicial seja construida usando full
+e a outra metade, half. Isto √© feito usando um range de profundidades,
+que ajudam a assegurar a variedade de formas e tamanhos. Da√≠ o nome ramped half-and-half.
 
-*** ImplementaÁ„o dos mÈtodos full e grow
-Inicialmente, ser„o definidas algumas funÁıes que servir„o como utilit·rios para
-a implementaÁ„o da funÁ„o de geraÁ„o.
-ComeÁando pela implementaÁ„o de uma funÁ„o que retorna a aridade de determinada 
-funÁ„o, a qual È especÌfica para cada implementaÁ„o de lisp. 
-Abaixo est· a para o SBCL, conforme esse [[https://stackoverflow.com/questions/15465138/find-functions-arity-in-common-lisp][tÛpico]].
+*** Implementa√ß√£o dos m√©todos full e grow
+Inicialmente, ser√£o definidas algumas fun√ß√µes que servir√£o como utilit√°rios para
+a implementa√ß√£o da fun√ß√£o de gera√ß√£o.
+Come√ßando pela implementa√ß√£o de uma fun√ß√£o que retorna a aridade de determinada 
+fun√ß√£o, a qual √© espec√≠fica para cada implementa√ß√£o de lisp. 
+Abaixo est√° a para o SBCL, conforme esse [[https://stackoverflow.com/questions/15465138/find-functions-arity-in-common-lisp][t√≥pico]].
 
 #+HEADER: :tangle "genetic-programming.lisp"
 #+BEGIN_SRC lisp
@@ -69,9 +69,9 @@ Abaixo est· a para o SBCL, conforme esse [[https://stackoverflow.com/questions/1
 	  (length arglist))))
 #+END_SRC
 
-Algumas primitivas, como +, -, * e /, que s„o essenciais para a realizaÁ„o de testes,
-possuem palavras chaves em suas listas de par‚metros. Portanto, definem-se
-algumas funÁıes para teste, com aridade conhecida.
+Algumas primitivas, como +, -, * e /, que s√£o essenciais para a realiza√ß√£o de testes,
+possuem palavras chaves em suas listas de par√¢metros. Portanto, definem-se
+algumas fun√ß√µes para teste, com aridade conhecida.
 
 #+HEADER: :tangle "genetic-programming.lisp"
 #+BEGIN_SRC lisp
@@ -85,7 +85,7 @@ algumas funÁıes para teste, com aridade conhecida.
   (defun %/2 (a b) (% a b))
 #+END_SRC
 
-Assim, È possÌvel definir a funÁ„o de geraÁ„o das expressıes, da seguinte
+Assim, √© poss√≠vel definir a fun√ß√£o de gera√ß√£o das express√µes, da seguinte
 forma:
 
 #+HEADER: :tangle "genetic-programming.lisp"
@@ -121,25 +121,25 @@ forma:
 #+END_SRC
 
 
-Percebe-se que o mÈtodo grow È muito dependente do tamanho dos conjuntos. 
-Quase sempre ir· gerar uma express„o relativamente simples, ou semelhante ‡
-gerada pelo mÈtodo full.
+Percebe-se que o m√©todo grow √© muito dependente do tamanho dos conjuntos. 
+Quase sempre ir√° gerar uma express√£o relativamente simples, ou semelhante √†
+gerada pelo m√©todo full.
 
-** SeleÁ„o 
-Assim como outros algoritmos evolucion·rios, a PG seleciona indivÌduos baseados
-em  seu fitness para a aplicaÁ„o dos operadores genÈticos. O mÈtodo utilizado nessa
-seÁ„o È o do torneio, mas qualquer outro pode ser utilizado.
+** Sele√ß√£o 
+Assim como outros algoritmos evolucion√°rios, a PG seleciona indiv√≠duos baseados
+em  seu fitness para a aplica√ß√£o dos operadores gen√©ticos. O m√©todo utilizado nessa
+se√ß√£o √© o do torneio, mas qualquer outro pode ser utilizado.
 
-No torneio, alguns indivÌduos da populaÁ„o s„o escolhidos aleatoriamente e s„o
-comparados entre si, sendo que o melhor deles È sselecionado como pai. No crossover,
-dois pais s„o necess·rios, logo duas seleÁıes s„o feitas. Assim, este mÈtodo n„o
-se preocupa com qu„o melhor È o indivÌduo escolhido, considerando apenas o fato de
-que ele È melhor. Isto ajuda a manter a press„o de seleÁ„o constante.
+No torneio, alguns indiv√≠duos da popula√ß√£o s√£o escolhidos aleatoriamente e s√£o
+comparados entre si, sendo que o melhor deles √© sselecionado como pai. No crossover,
+dois pais s√£o necess√°rios, logo duas sele√ß√µes s√£o feitas. Assim, este m√©todo n√£o
+se preocupa com qu√£o melhor √© o indiv√≠duo escolhido, considerando apenas o fato de
+que ele √© melhor. Isto ajuda a manter a press√£o de sele√ß√£o constante.
 
-Desta forma, um indivÌduo extraordinariamente bom n„o pode imediatamente tomar controle
-da populaÁ„o. Se isto acontecesse, haveria uma perda r·pida na diversidade.
+Desta forma, um indiv√≠duo extraordinariamente bom n√£o pode imediatamente tomar controle
+da popula√ß√£o. Se isto acontecesse, haveria uma perda r√°pida na diversidade.
 
-Abaixo est· implementado uma funÁ„o de seleÁ„o do tipo torneio.
+Abaixo est√° implementado uma fun√ß√£o de sele√ß√£o do tipo torneio.
 
 #+HEADER: :tangle "genetic-programming.lisp"
 #+BEGIN_SRC lisp
@@ -158,14 +158,14 @@ Abaixo est· implementado uma funÁ„o de seleÁ„o do tipo torneio.
 #+RESULTS:
 : SELECT-BEST
 
-** RecombinaÁ„o e mutaÁ„o
-PG se distanciam consideravelmente dos outros algoritmo evolucion·rios no 
-que diz respeito ‡ crossover e mutaÁ„o. A forma mais comum de crossover utilizada È
+** Recombina√ß√£o e muta√ß√£o
+PG se distanciam consideravelmente dos outros algoritmo evolucion√°rios no 
+que diz respeito √† crossover e muta√ß√£o. A forma mais comum de crossover utilizada √©
 o subtree crossover. 
-Dados dois pais, o crossover de sub-·rvore escolhe um ponto (nÛ)
-aleatoriamente, independente em cada pai. Ent„o, o offspring È criado ao substituir
-a sub-·rvore que comeÁa no ponto escolhido no pai 1 por uma cÛpia da sub-·rvore
-que comeÁa no pai 2.
+Dados dois pais, o crossover de sub-√°rvore escolhe um ponto (n√≥)
+aleatoriamente, independente em cada pai. Ent√£o, o offspring √© criado ao substituir
+a sub-√°rvore que come√ßa no ponto escolhido no pai 1 por uma c√≥pia da sub-√°rvore
+que come√ßa no pai 2.
 
 #+BEGIN_EXAMPLE lisp
   ;pai 1:
@@ -178,14 +178,14 @@ que comeÁa no pai 2.
   (+ (/ x 2) 3)
 #+END_EXAMPLE
 
-Vale notar q È possÌvel definir uma vers„o do crossover que retorna dois filhos,
-mas isto n„o È muito utilizado.
+Vale notar q √© poss√≠vel definir uma vers√£o do crossover que retorna dois filhos,
+mas isto n√£o √© muito utilizado.
 
-A implementaÁ„o do crossover ser· feita da seguinte forma:
-Inicialmente, È preciso definir duas funÁıes utilit·rias. A primeira, flat-length,
-que retorna quantos nÛs a estrutura possui, para que o ponto seja gerado corretamente.
-A segunda, flat-nth, que retorna o enÈsimo nÛ da estrutura. AlÈm disso,
-flat-nth È setf-able, indicando que È possÌvel fazer a troca entre as sub-·rvores
+A implementa√ß√£o do crossover ser√° feita da seguinte forma:
+Inicialmente, √© preciso definir duas fun√ß√µes utilit√°rias. A primeira, flat-length,
+que retorna quantos n√≥s a estrutura possui, para que o ponto seja gerado corretamente.
+A segunda, flat-nth, que retorna o en√©simo n√≥ da estrutura. Al√©m disso,
+flat-nth √© setf-able, indicando que √© poss√≠vel fazer a troca entre as sub-√°rvores
 de uma forma simples
 
 #+HEADER: :tangle "genetic-programming.lisp"
@@ -227,10 +227,10 @@ de uma forma simples
       (car (rec (list tree) 0))))
 #+END_SRC
 
-… bom notar que o setf do flat-nth n„o È 
-destrutivo, diferente do convencional. Dessa forma n„o È necess·rio 
-realizar cÛpias do pai 1, visto que este n„o ser· alterado.
-Utilizando essas funÁıes auxiliares, o subtree crossover seria implementado da
+√â bom notar que o setf do flat-nth n√£o √© 
+destrutivo, diferente do convencional. Dessa forma n√£o √© necess√°rio 
+realizar c√≥pias do pai 1, visto que este n√£o ser√° alterado.
+Utilizando essas fun√ß√µes auxiliares, o subtree crossover seria implementado da
 seguinte forma:
 
 #+HEADER: :tangle "genetic-programming.lisp"
@@ -241,20 +241,20 @@ seguinte forma:
     parent-1)
 #+END_SRC
 
-Para a mutaÁ„o, a mais comum È a chamada subtree mutation. Nela, um ponto È escolhido
-aleatoriamente na ·rvore. A sub-·rvore que possui como raiz o nÛ escolhido
-È substituÌda por uma nova, gerada aleatoriamente. Esta mutaÁ„o È 
-implementada em alguns casos como um crossover entre um pai e um indivÌduo gerado
-aleatoriamente (operaÁ„o tambÈm chamada de headless chicken crossover).
+Para a muta√ß√£o, a mais comum √© a chamada subtree mutation. Nela, um ponto √© escolhido
+aleatoriamente na √°rvore. A sub-√°rvore que possui como raiz o n√≥ escolhido
+√© substitu√≠da por uma nova, gerada aleatoriamente. Esta muta√ß√£o √© 
+implementada em alguns casos como um crossover entre um pai e um indiv√≠duo gerado
+aleatoriamente (opera√ß√£o tamb√©m chamada de headless chicken crossover).
 
-Outra forma comum de crossover È a point mutation, que È a equivalente em PG 
-‡ mutaÁ„o de bit-flip, usada em AGs. Em mutaÁ„o de ponto, um nÛ È selecionado
-aleatoriamente e a primitiva ali armazenada È subtituida por outra de mesma aridade.
+Outra forma comum de crossover √© a point mutation, que √© a equivalente em PG 
+√† muta√ß√£o de bit-flip, usada em AGs. Em muta√ß√£o de ponto, um n√≥ √© selecionado
+aleatoriamente e a primitiva ali armazenada √© subtituida por outra de mesma aridade.
 
-Geralmente, a probabilidade de crossover chega a 90%, enquanto a de mutaÁ„o
-n„o costuma passar dos 1%.
+Geralmente, a probabilidade de crossover chega a 90%, enquanto a de muta√ß√£o
+n√£o costuma passar dos 1%.
 
-A mutaÁ„o de sub-·rvore est· implementada abaixo.
+A muta√ß√£o de sub-√°rvore est√° implementada abaixo.
 
 #+HEADER: :tangle "genetic-programming.lisp"
 #+BEGIN_SRC lisp
@@ -266,229 +266,229 @@ A mutaÁ„o de sub-·rvore est· implementada abaixo.
 							  grow-rate)))
 #+END_SRC
 
-* Se preparando para rodar ProgramaÁ„o GenÈtica
+* Se preparando para rodar Programa√ß√£o Gen√©tica
 
-Para aplicar um sistema de PG a um problema, algumas decisıes precisam ser tomadas.
-Estes s„o conhecidos como passos preparatÛrios. As escolhas principais s„o:
-1- O que È o conjunto de terminais?
-2- O que È o conjunto de funÁıes?
-3- O que È a medida do fitness?
-4- Quais par‚metros ser„o usados para controlar a execuÁ„o?
-5- Qual ser· o critÈrio de encerramento e qual ser· o resultado da execuÁ„o?
+Para aplicar um sistema de PG a um problema, algumas decis√µes precisam ser tomadas.
+Estes s√£o conhecidos como passos preparat√≥rios. As escolhas principais s√£o:
+1- O que √© o conjunto de terminais?
+2- O que √© o conjunto de fun√ß√µes?
+3- O que √© a medida do fitness?
+4- Quais par√¢metros ser√£o usados para controlar a execu√ß√£o?
+5- Qual ser√° o crit√©rio de encerramento e qual ser√° o resultado da execu√ß√£o?
 
 ** Conjunto de terminais
-Enquanto È comum descrever PG como evoluÁ„o de programas, estes programas
-por sua vez n„o s„o muito parecidos com os convencionais, usados para
-desenvolvimento de software. As duas etapas iniciais de preparaÁ„o definem a
-linguagem disponÌvel a PG. 
+Enquanto √© comum descrever PG como evolu√ß√£o de programas, estes programas
+por sua vez n√£o s√£o muito parecidos com os convencionais, usados para
+desenvolvimento de software. As duas etapas iniciais de prepara√ß√£o definem a
+linguagem dispon√≠vel a PG. 
 
 Um conjunto de terminais consiste em:
 - As entradas externas do programa
-- FunÁıes de aridade zero
+- Fun√ß√µes de aridade zero
 - Constantes
 
 Adicionar uma primitiva como o random pode causar um programa executar de forma 
-diferente toda vez que È chamado. Isto pode ser o desejado, em alguns casos.
-Entretanto, na maioria das vezes, deseja-se a geraÁ„o de algumas constantes
-aleatÛrias apenas no processo de inicializaÁ„o. Isto È geralmente alcanÁado
+diferente toda vez que √© chamado. Isto pode ser o desejado, em alguns casos.
+Entretanto, na maioria das vezes, deseja-se a gera√ß√£o de algumas constantes
+aleat√≥rias apenas no processo de inicializa√ß√£o. Isto √© geralmente alcan√ßado
 ao introduzir um terminal conhecido como um ephemeral random constant.
-Toda vez q este terminal È escolhido na construÁ„o da ·rvore inicial, 
-um valor aleatÛrio diferente È gerado, que ficar· fixo pelo restante da execuÁ„o.
+Toda vez q este terminal √© escolhido na constru√ß√£o da √°rvore inicial, 
+um valor aleat√≥rio diferente √© gerado, que ficar√° fixo pelo restante da execu√ß√£o.
 
-** Conjunto de funÁıes
-O conjunto de funÁıes usadas em uma PG depende da natureza do problema a ser
-resolvido. Em um problema numÈrico, o conjunto de funÁıes pode consistir em 
-funÁıes aritmÈticas, por exemplo. Entretanto, qualquer tipo de funÁ„o encontrados
-em programas de computadores podem ser usados. S„o exemplos:
-1- AritmÈticas: +, -, *, /
-2- Matem·ticas: sin, cos, exp
+** Conjunto de fun√ß√µes
+O conjunto de fun√ß√µes usadas em uma PG depende da natureza do problema a ser
+resolvido. Em um problema num√©rico, o conjunto de fun√ß√µes pode consistir em 
+fun√ß√µes aritm√©ticas, por exemplo. Entretanto, qualquer tipo de fun√ß√£o encontrados
+em programas de computadores podem ser usados. S√£o exemplos:
+1- Aritm√©ticas: +, -, *, /
+2- Matem√°ticas: sin, cos, exp
 3- Booleanas: and, or, not
 4- Condicionais: if-then-else
 5- Iteradores: loop, do
 
 *** Closure
-Para que uma PG funcione corretamente, a maioria dos conjuntos de funÁıes 
+Para que uma PG funcione corretamente, a maioria dos conjuntos de fun√ß√µes 
 necessitam de uma propriedade chamada closure, que pode ser
-dividida em consistÍncia de tipos e seguranÁa de avaliaÁ„o.
+dividida em consist√™ncia de tipos e seguran√ßa de avalia√ß√£o.
 
-ConsistÍncia de tipos deve acontecer pois os operadores genÈticos
-assumem a possibilidade de intervenÁ„o em qualquer ponto. Ou seja, È
-necess·rio que os retornos das funÁıes e os argumentos das mesmas sejam 
+Consist√™ncia de tipos deve acontecer pois os operadores gen√©ticos
+assumem a possibilidade de interven√ß√£o em qualquer ponto. Ou seja, √©
+necess√°rio que os retornos das fun√ß√µes e os argumentos das mesmas sejam 
 de tipos semelhantes, para que haja essa intercambialidade. Em alguns
-casos, È possÌvel fazer a convers„o de tipos, mas esta tÈcnica n„o È muito
-recomendade, pois introduz polaridades inesperadas ‡ busca. 
+casos, √© poss√≠vel fazer a convers√£o de tipos, mas esta t√©cnica n√£o √© muito
+recomendade, pois introduz polaridades inesperadas √† busca. 
 
-Isto pode parecer um problema, mas na maioria dos casos uma simples reestruturaÁ„o
-das funÁıes pode resolver. No caso do if, o qual recebe como primeiro argumento
-uma express„o booleana. … possivel reescrevÍ-lo para aceitar quatro argumentos,
-no caso os dois primeiros fariam a verificaÁ„o de a < b, por exemplo. 
+Isto pode parecer um problema, mas na maioria dos casos uma simples reestrutura√ß√£o
+das fun√ß√µes pode resolver. No caso do if, o qual recebe como primeiro argumento
+uma express√£o booleana. √â possivel reescrev√™-lo para aceitar quatro argumentos,
+no caso os dois primeiros fariam a verifica√ß√£o de a < b, por exemplo. 
 
-Uma alternativa para o uso de consistÍncia de tipos È expandir o sistema
-de PG, para que os operadores genÈticos introduzam apenas cÛdigo que retorne 
+Uma alternativa para o uso de consist√™ncia de tipos √© expandir o sistema
+de PG, para que os operadores gen√©ticos introduzam apenas c√≥digo que retorne 
 o mesmo tipo de valor que aquele retirado.
 
-A outra componente das closures È a seguranÁa de avaliaÁ„o. Isto È necess·rio
-j· que muitas funÁıes podem falhar em tempo de execuÁ„o. Uma express„o pode tentar
-realizar uma divis„o por zero, ou algo do tipo. Isto È solucionado modificando o 
-comportamento das primitivas. Geralmente, s„o utilizadas versıes protegidas de 
-funÁıes numÈricas, que poderiam gerar exceÁıes (divis„o, logaritmo, exponencial
+A outra componente das closures √© a seguran√ßa de avalia√ß√£o. Isto √© necess√°rio
+j√° que muitas fun√ß√µes podem falhar em tempo de execu√ß√£o. Uma express√£o pode tentar
+realizar uma divis√£o por zero, ou algo do tipo. Isto √© solucionado modificando o 
+comportamento das primitivas. Geralmente, s√£o utilizadas vers√µes protegidas de 
+fun√ß√µes num√©ricas, que poderiam gerar exce√ß√µes (divis√£o, logaritmo, exponencial
 e raiz quadrada). 
 
-Outra alternativa È encapsular o tempo de execuÁ„o e penalizar gravemente
-programas que gerem erros. Isto acarreta a geraÁ„o de v·rias
-expressıes com erro, com fitness geral baixo. 
+Outra alternativa √© encapsular o tempo de execu√ß√£o e penalizar gravemente
+programas que gerem erros. Isto acarreta a gera√ß√£o de v√°rias
+express√µes com erro, com fitness geral baixo. 
 
-Outro erro em tempo de execuÁ„o envolve overflow. Em algumas implementaÁıes
-isto j· È tratado automaticamente. Caso isto ocorra, È necess·rio 
-incluir verificaÁıes para registrar tais exceÁıes. 
+Outro erro em tempo de execu√ß√£o envolve overflow. Em algumas implementa√ß√µes
+isto j√° √© tratado automaticamente. Caso isto ocorra, √© necess√°rio 
+incluir verifica√ß√µes para registrar tais exce√ß√µes. 
 
-*** SuficiÍncia
-Existe mais uma propriedade que os conjuntos de primitivas devem ter: suficiÍncia.
-Isto quer dizer que deve ser possÌvel expressar uma soluÁ„o em termos dos 
-elementos usados como primitivas. Infelizmente, suficiÍncia sÛ pode
-ser garantida para problemas conhecidos, que j· tenham essa informaÁ„o.
+*** Sufici√™ncia
+Existe mais uma propriedade que os conjuntos de primitivas devem ter: sufici√™ncia.
+Isto quer dizer que deve ser poss√≠vel expressar uma solu√ß√£o em termos dos 
+elementos usados como primitivas. Infelizmente, sufici√™ncia s√≥ pode
+ser garantida para problemas conhecidos, que j√° tenham essa informa√ß√£o.
 
-Por exemplo, o conjunto {and, or, not, x1, x2, ..., xn} È suficiente
-par a todos os problemas de induÁ„o booleana. J· o conjunto 
-{+, -, *, /, x, 0, 1, 2} È incapaz de representar todas as funÁıes transcendentes.
-A funÁ„o exp(x) È transcendente, e n„o È capaz de ser escrita de forma racional,
-ent„o n„o pode ser representada exatamente pelo conjunto acima. Quando o conjunto
-È insuficiente, PG È capaz de desenvolver apenas aproximaÁıes. Felizmente, em
-v·rios casos essas aproximaÁıes s„o boas o suficiente para o propÛsito do 
-usu·rio. 
+Por exemplo, o conjunto {and, or, not, x1, x2, ..., xn} √© suficiente
+par a todos os problemas de indu√ß√£o booleana. J√° o conjunto 
+{+, -, *, /, x, 0, 1, 2} √© incapaz de representar todas as fun√ß√µes transcendentes.
+A fun√ß√£o exp(x) √© transcendente, e n√£o √© capaz de ser escrita de forma racional,
+ent√£o n√£o pode ser representada exatamente pelo conjunto acima. Quando o conjunto
+√© insuficiente, PG √© capaz de desenvolver apenas aproxima√ß√µes. Felizmente, em
+v√°rios casos essas aproxima√ß√µes s√£o boas o suficiente para o prop√≥sito do 
+usu√°rio. 
 
-A adiÁ„o de primitivas desnecess·rias para tentar providenciar suficiÍncia n„o
-tende a diminuir a eficiÍncia da PG, mas as vezes pode levar a convers„o do 
+A adi√ß√£o de primitivas desnecess√°rias para tentar providenciar sufici√™ncia n√£o
+tende a diminuir a efici√™ncia da PG, mas as vezes pode levar a convers√£o do 
 sistema a caminhos inesperados.
 
-*** Evoluindo estruturas alÈm de programas
-Existem muitos problemas os quais as soluÁıes n„o podem ser escritas como programas
+*** Evoluindo estruturas al√©m de programas
+Existem muitos problemas os quais as solu√ß√µes n√£o podem ser escritas como programas
 de computadores. Problemas de design, por exemplo. Nesses casos, existe
-um truque para o funcionamento de PG. O conjunto de primitivas È selecionado
-de tal maneira que os programas evoluÌdos construam soluÁıes para o problema.
+um truque para o funcionamento de PG. O conjunto de primitivas √© selecionado
+de tal maneira que os programas evolu√≠dos construam solu√ß√µes para o problema.
 
-** FunÁ„o de aptid„o
-Os dois primeiros passos definiram o espaÁo de busca que a PG pode explorar. 
-Ou seja, todos os programas que podem ser criados a partir da combinaÁ„o de 
-primitivas. AtÈ agora, n„o se sabe quais regiıes do espaÁo de busca apresentam
-soluÁıes vi·veis ao problema. Para isto, utiliza-se a medida de fitness,
-que È o mecanismo prim·rio para definiÁ„o do problema em alto-nÌvel. 
+** Fun√ß√£o de aptid√£o
+Os dois primeiros passos definiram o espa√ßo de busca que a PG pode explorar. 
+Ou seja, todos os programas que podem ser criados a partir da combina√ß√£o de 
+primitivas. At√© agora, n√£o se sabe quais regi√µes do espa√ßo de busca apresentam
+solu√ß√µes vi√°veis ao problema. Para isto, utiliza-se a medida de fitness,
+que √© o mecanismo prim√°rio para defini√ß√£o do problema em alto-n√≠vel. 
 
-Fitness pode ser medido de v·rias formas. Por exemplo, em termos de erro 
-entre a saÌda desejada e a que o programa est· gerando, 
+Fitness pode ser medido de v√°rias formas. Por exemplo, em termos de erro 
+entre a sa√≠da desejada e a que o programa est√° gerando, 
 a quantidade de tempo (recursos) para levar um sistema a determinado estado, 
-a precis„o de um programa em reconhecer padrıes, o payoff em um sistema de
-jogos ou a conformidade com as especificaÁıes do usu·rio. 
+a precis√£o de um programa em reconhecer padr√µes, o payoff em um sistema de
+jogos ou a conformidade com as especifica√ß√µes do usu√°rio. 
 
-Diferente dos algoritmos evolucion·rios convencionais, os indivÌduos na PG
-s„o programas, os quais geralmente devem ser executados (mais de uma vez) para 
-definir algum tipo de aptid„o. 
+Diferente dos algoritmos evolucion√°rios convencionais, os indiv√≠duos na PG
+s√£o programas, os quais geralmente devem ser executados (mais de uma vez) para 
+definir algum tipo de aptid√£o. 
 
-Apesar de ser possÌvel compilar os programas gerados pela PG, isto È 
-extremamente eficaz, sendo muito mais comum a utilizaÁ„o de um interpretador 
-para realizar a avaliaÁ„o dos programas avaliados. 
+Apesar de ser poss√≠vel compilar os programas gerados pela PG, isto √© 
+extremamente eficaz, sendo muito mais comum a utiliza√ß√£o de um interpretador 
+para realizar a avalia√ß√£o dos programas avaliados. 
 
-Isto significa executar os nÛs de uma ·rvore em uma ordem que garante
-que os nÛs sejam executados apenas apÛs a execuÁ„o de todos os seus argumentos.
-Isto È feito transitando a estrutura recursivamente, e postergando a avaliaÁ„o
-de cada nÛ atÈ que suas sub-·rvores sejam avaliadas. Isto j· È 
-feito automaticamente pela funÁ„o eval, do Common Lisp. 
+Isto significa executar os n√≥s de uma √°rvore em uma ordem que garante
+que os n√≥s sejam executados apenas ap√≥s a execu√ß√£o de todos os seus argumentos.
+Isto √© feito transitando a estrutura recursivamente, e postergando a avalia√ß√£o
+de cada n√≥ at√© que suas sub-√°rvores sejam avaliadas. Isto j√° √© 
+feito automaticamente pela fun√ß√£o eval, do Common Lisp. 
 
-¡s vezes, È interessante a saida produzida pelo programa. Outras, vezes, 
-d·-se prioridade aos efeitos colaterais. Em ambos os casos, a medida de
-fitness dependem dos resultados produzidos pela execuÁ„o do programa,
-utilizando v·rias entradas, ou sobre uma variedade de condiÁıes (fitness cases).
+√Ås vezes, √© interessante a saida produzida pelo programa. Outras, vezes, 
+d√°-se prioridade aos efeitos colaterais. Em ambos os casos, a medida de
+fitness dependem dos resultados produzidos pela execu√ß√£o do programa,
+utilizando v√°rias entradas, ou sobre uma variedade de condi√ß√µes (fitness cases).
 
-Outra propriedade da mediÁ„o de aptid„o em PG È que em v·rios problemas pr·ticos,
-se refere a uma mediÁ„o multi-objetivo.
+Outra propriedade da medi√ß√£o de aptid√£o em PG √© que em v√°rios problemas pr√°ticos,
+se refere a uma medi√ß√£o multi-objetivo.
 
-** Par‚metros da PG
-A quarte etapa especifica os par‚metros de controle da execuÁ„o.
-O mais importante È o tamanho da populaÁ„o. Outros par‚metros se referem ‡s
-probabilidades de executar os operadores genÈticos, o tamanho m·ximo dos
-programas e outros detalhes da execuÁ„o.
-N„o È possÌvel recomendar valores Ûtimos para os par‚metros, mas comumente
-s„o utilizados os seguintes:
+** Par√¢metros da PG
+A quarte etapa especifica os par√¢metros de controle da execu√ß√£o.
+O mais importante √© o tamanho da popula√ß√£o. Outros par√¢metros se referem √†s
+probabilidades de executar os operadores gen√©ticos, o tamanho m√°ximo dos
+programas e outros detalhes da execu√ß√£o.
+N√£o √© poss√≠vel recomendar valores √≥timos para os par√¢metros, mas comumente
+s√£o utilizados os seguintes:
 
-A populaÁ„o inicial È gerada utilizando ramped half-and-half com uma variaÁ„o
-de profundidade indo de 2 a 6. Tradicionalmente, 90% dos filhos s„o criados
-por crossover de sub-·rvore. Entretanto, uma mistura de 50-50 entre crossover
-e v·rias tÈcnicas de mutaÁ„o tambÈm parecem ser eficazes. 
+A popula√ß√£o inicial √© gerada utilizando ramped half-and-half com uma varia√ß√£o
+de profundidade indo de 2 a 6. Tradicionalmente, 90% dos filhos s√£o criados
+por crossover de sub-√°rvore. Entretanto, uma mistura de 50-50 entre crossover
+e v√°rias t√©cnicas de muta√ß√£o tamb√©m parecem ser eficazes. 
 
-A limitaÁ„o do tamanho da populaÁ„o est· relacionada ao tempo para avaliar o
-fitness, e n„o o espaÁo de armazenamento das estruturas. Como regra, È
-preferÌvel utilizar o maior tamanho de populaÁ„o possÌvel, sendo pelo menos
-500. Uma aproximaÁ„o inicial de tempo de execuÁ„o pode ser estimada
-pelo produto entre o n˙mero de execuÁıes, o n˙mero de geraÁıes, o tamanho
-da populaÁ„o, o tamanho mÈdio dos programas e o n˙mero de fitness cases.
+A limita√ß√£o do tamanho da popula√ß√£o est√° relacionada ao tempo para avaliar o
+fitness, e n√£o o espa√ßo de armazenamento das estruturas. Como regra, √©
+prefer√≠vel utilizar o maior tamanho de popula√ß√£o poss√≠vel, sendo pelo menos
+500. Uma aproxima√ß√£o inicial de tempo de execu√ß√£o pode ser estimada
+pelo produto entre o n√∫mero de execu√ß√µes, o n√∫mero de gera√ß√µes, o tamanho
+da popula√ß√£o, o tamanho m√©dio dos programas e o n√∫mero de fitness cases.
 
-Normalmente, o n˙mero de geraÁıes vai de 10 a 50, pois È quando acontece a maior 
-parte das convergÍncias. Algumas vezes, o n˙mero de fitness cases È limitado
-pela quantidade de dados disponÌveis para treinamento. Nesse caso, 
-a funÁ„o de aptid„o deve utilizar tudo o que est· disponÌvel. J· em
-outros casos, È melhor reduzir o tamanho do conjunto de treinamento, utilizando
+Normalmente, o n√∫mero de gera√ß√µes vai de 10 a 50, pois √© quando acontece a maior 
+parte das converg√™ncias. Algumas vezes, o n√∫mero de fitness cases √© limitado
+pela quantidade de dados dispon√≠veis para treinamento. Nesse caso, 
+a fun√ß√£o de aptid√£o deve utilizar tudo o que est√° dispon√≠vel. J√° em
+outros casos, √© melhor reduzir o tamanho do conjunto de treinamento, utilizando
 algum algoritmo para isto. 
 
-** Encerramento e design da soluÁ„o
-A quinta etapa consiste em especificar o critÈrio de parada (que
-geralmente envolve um n˙mero m·ximo de geraÁıes ou um predicado especÌfico
-para o problem) e o mÈtodo para designar o resultado da execuÁ„o (geralmente
-o melhor indivÌduo, ou os n Melhores).
+** Encerramento e design da solu√ß√£o
+A quinta etapa consiste em especificar o crit√©rio de parada (que
+geralmente envolve um n√∫mero m√°ximo de gera√ß√µes ou um predicado espec√≠fico
+para o problem) e o m√©todo para designar o resultado da execu√ß√£o (geralmente
+o melhor indiv√≠duo, ou os n Melhores).
 
-* Exemplo de execuÁ„o de ProgramaÁ„o GenÈtica
+* Exemplo de execu√ß√£o de Programa√ß√£o Gen√©tica
 
-Nesta seÁ„o, ser· seguido um exemplo, no qual uma PG buscar· evoluir
-uma express„o cujo valor corresponda a funÁ„o quadr·tica $$x^{2}+x+1$$ entre
+Nesta se√ß√£o, ser√° seguido um exemplo, no qual uma PG buscar√° evoluir
+uma express√£o cujo valor corresponda a fun√ß√£o quadr√°tica $$x^{2}+x+1$$ entre
 [-1, 1]. O processo de criar mecanicamente um programa de computador que ajusta 
-um grupo de dados È chamado de identificaÁ„o de sistema, ou regress„o simbÛlica.
-ComeÁando pelos cinco passos preparatÛrios:
+um grupo de dados √© chamado de identifica√ß√£o de sistema, ou regress√£o simb√≥lica.
+Come√ßando pelos cinco passos preparat√≥rios:
 
 #+HEADER: :exports none :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
   (in-package :genetic-programming)
 #+END_SRC
 
-** Passos preparatÛrios
-Nos dois primeiros passos, È escolhido o conjunto de ingredientes sobre
-o qual a PG trabalha. J· que o problema È encontrar uma funÁ„o matem·tica
-de uma vari·vel independente, x, a mesma deve estar presente no conjunto
-de terminais. Este conjunto tambÈm inclui constantes efÍmeras aleatÛrias,
-obtidas de um range razo·vel, no caso -5.0 a +5.0. Portanto, o conjunto terminal,
-T, È dado por: $$T = {x, R}$$.
+** Passos preparat√≥rios
+Nos dois primeiros passos, √© escolhido o conjunto de ingredientes sobre
+o qual a PG trabalha. J√° que o problema √© encontrar uma fun√ß√£o matem√°tica
+de uma vari√°vel independente, x, a mesma deve estar presente no conjunto
+de terminais. Este conjunto tamb√©m inclui constantes ef√™meras aleat√≥rias,
+obtidas de um range razo√°vel, no caso -5.0 a +5.0. Portanto, o conjunto terminal,
+T, √© dado por: $$T = {x, R}$$.
 
-A definiÁ„o do problema n„o especifica quais operaÁıes podem ser feitas.
-Logo, È razo·vel que apenas os operadores basicos sejam adicionados. Algumas
-outras regressıes podem necessitar de pelo menos essas operaÁıes, alÈm de outras
-adicionais, como seno ou log. Assim, o conjunto de funÁıes ser·: 
+A defini√ß√£o do problema n√£o especifica quais opera√ß√µes podem ser feitas.
+Logo, √© razo√°vel que apenas os operadores basicos sejam adicionados. Algumas
+outras regress√µes podem necessitar de pelo menos essas opera√ß√µes, al√©m de outras
+adicionais, como seno ou log. Assim, o conjunto de fun√ß√µes ser√°: 
 $$F = {+, -, *, %}$$
-No qual % È a divis„o protegida. 
+No qual % √© a divis√£o protegida. 
 
-O terceiro passo envolve construir a medida de fitness. Em alto-nÌvel, este
-problema busca encontrar um programa cuja saÌda sejam iguais ‡s aquelas 
-do polinÙmio $x^{2}+x+1$. Assim, o fitness associado a um indivÌduo deve
-representar qu„o perto ele se aproxima dessa funÁ„o.
+O terceiro passo envolve construir a medida de fitness. Em alto-n√≠vel, este
+problema busca encontrar um programa cuja sa√≠da sejam iguais √†s aquelas 
+do polin√¥mio $x^{2}+x+1$. Assim, o fitness associado a um indiv√≠duo deve
+representar qu√£o perto ele se aproxima dessa fun√ß√£o.
 
-Em princÌpio, poderia ser calculada a integral de diferenÁa entre a funÁ„o
-evoluÌda e a alvo. Entretanto, para a maioria dos problemas de regress„o simbÛlica,
-essa estratÈgia È invi·vel. Assim, È comum definir o fitness como a soma dos erros
-absolutos, medidos em diferentes valores na vari·vel independente x, entre [-1.0, +1.0].
-Em particular, ser„o medidos os valores do erros para x pertencendo a 
+Em princ√≠pio, poderia ser calculada a integral de diferen√ßa entre a fun√ß√£o
+evolu√≠da e a alvo. Entretanto, para a maioria dos problemas de regress√£o simb√≥lica,
+essa estrat√©gia √© invi√°vel. Assim, √© comum definir o fitness como a soma dos erros
+absolutos, medidos em diferentes valores na vari√°vel independente x, entre [-1.0, +1.0].
+Em particular, ser√£o medidos os valores do erros para x pertencendo a 
 {-1.0, -0.9, ..., 0.9, 1.0}. Quanto menor o valor do fitness, melhor, sendo
-0 a regress„o perfeita. Com essa definiÁ„o, o fitness definido È aproximadamente
-proporcional ‡ ·rea entre as duas curvas.
+0 a regress√£o perfeita. Com essa defini√ß√£o, o fitness definido √© aproximadamente
+proporcional √† √°rea entre as duas curvas.
 
-O quarto passo define os par‚metros de execuÁ„o. A populaÁ„o neste
-exemplo ser· pequena, com apenas quatro indivÌduos. O crossover ser· 
-respons·vel por constituir 50% da populaÁ„o. As operaÁıes de reproduÁ„o (elitismo)
-e mutaÁ„o ser„o usadas para gerar os outros 50%, sendo 25% cada. 
-OperaÁıes de alteraÁ„o de arquitetura ser„o respons·veis pelos outros 1%. 
+O quarto passo define os par√¢metros de execu√ß√£o. A popula√ß√£o neste
+exemplo ser√° pequena, com apenas quatro indiv√≠duos. O crossover ser√° 
+respons√°vel por constituir 50% da popula√ß√£o. As opera√ß√µes de reprodu√ß√£o (elitismo)
+e muta√ß√£o ser√£o usadas para gerar os outros 50%, sendo 25% cada. 
+Opera√ß√µes de altera√ß√£o de arquitetura ser√£o respons√°veis pelos outros 1%. 
 
-Na ˙ltima etapa, È necess·rio estabelecer a condiÁ„o de parada. Nesse exemplo,
-a execuÁ„o continuar· atÈ que atÈ que um indivÌduo alcance fitness menor que 0.1.
+Na √∫ltima etapa, √© necess√°rio estabelecer a condi√ß√£o de parada. Nesse exemplo,
+a execu√ß√£o continuar√° at√© que at√© que um indiv√≠duo alcance fitness menor que 0.1.
 
-** ExecuÁ„o passo a passo.
-*** InicializaÁ„o
-Inicialmente, uma populaÁ„o de quatro indivÌduos È criada, optou-se por
+** Execu√ß√£o passo a passo.
+*** Inicializa√ß√£o
+Inicialmente, uma popula√ß√£o de quatro indiv√≠duos √© criada, optou-se por
 implementar uma classe que representa os programas:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
@@ -501,7 +501,7 @@ implementar uma classe que representa os programas:
      (fitness :initform 0 :accessor fitness)))
 #+END_SRC
 
-Sendo necess·rio implementar a funÁ„o =generate-random-program= para gerar
+Sendo necess√°rio implementar a fun√ß√£o =generate-random-program= para gerar
 objetos dessa classe:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
@@ -524,7 +524,7 @@ objetos dessa classe:
     (remove-if-not #'symbolp list))
 #+END_SRC
 
-Assim, a populaÁ„o inicial È gerada da forma:
+Assim, a popula√ß√£o inicial √© gerada da forma:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
@@ -544,7 +544,7 @@ Assim, a populaÁ„o inicial È gerada da forma:
 	    result)))
 #+END_SRC
 
-Modificando o mÈtodo =print-object= para facilitar a visualizaÁ„o:
+Modificando o m√©todo =print-object= para facilitar a visualiza√ß√£o:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
@@ -553,10 +553,10 @@ Modificando o mÈtodo =print-object= para facilitar a visualizaÁ„o:
       (format stream "(~{~a~^ ~})~%~2t~a" (params obj) (expression obj))))
 #+END_SRC
 
-*** AvaliaÁ„o de Aptid„o
-Em seguida, a aptid„o de cada um deve ser medida. Primeiramente, deve-se 
-transformar o objeto da classe programa em um cÛdigo execut·vel. Isto
-È feito da seguinte forma:
+*** Avalia√ß√£o de Aptid√£o
+Em seguida, a aptid√£o de cada um deve ser medida. Primeiramente, deve-se 
+transformar o objeto da classe programa em um c√≥digo execut√°vel. Isto
+√© feito da seguinte forma:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
@@ -568,9 +568,9 @@ transformar o objeto da classe programa em um cÛdigo execut·vel. Isto
 	     ,(slot-value p 'expression))))
 #+END_SRC
 
-A seguir, a funÁ„o de aptid„o È implementada. Nela, o programa execut·vel È
-aplicado a todos os valores entre min e max, incrementando por step e a diferenÁa
-entre o objetivo È calculada.
+A seguir, a fun√ß√£o de aptid√£o √© implementada. Nela, o programa execut√°vel √©
+aplicado a todos os valores entre min e max, incrementando por step e a diferen√ßa
+entre o objetivo √© calculada.
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
@@ -585,11 +585,11 @@ entre o objetivo È calculada.
 		 finally (return deviation))))))
 #+END_SRC
 
-*** SeleÁ„o, Crossover e MutaÁ„o
-Depois que o fitness de cada indivÌduo È atribuÌdo, È necess·rio
-escolher os melhores programas para atuarem como os pais na prÛxima geraÁ„o.
-Ser· utilizado o mÈtodo do torneio, j· implementado.
-A composiÁ„o da nova populaÁ„o ser· da forma:
+*** Sele√ß√£o, Crossover e Muta√ß√£o
+Depois que o fitness de cada indiv√≠duo √© atribu√≠do, √© necess√°rio
+escolher os melhores programas para atuarem como os pais na pr√≥xima gera√ß√£o.
+Ser√° utilizado o m√©todo do torneio, j√° implementado.
+A composi√ß√£o da nova popula√ß√£o ser√° da forma:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
@@ -642,8 +642,8 @@ A composiÁ„o da nova populaÁ„o ser· da forma:
 #+END_SRC
 
 *** Encerramento
-O fim da execuÁ„o ocorrer· quando o fitness do melhor indivÌduo for menor que
-um valor especÌfico. Logo:
+O fim da execu√ß√£o ocorrer√° quando o fitness do melhor indiv√≠duo for menor que
+um valor espec√≠fico. Logo:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
@@ -654,7 +654,7 @@ um valor especÌfico. Logo:
 #+END_SRC
 
 *** Montagem
-Por fim, o algoritmo como um todo È implementado da seguinte forma:
+Por fim, o algoritmo como um todo √© implementado da seguinte forma:
 
 #+HEADER: :tangle "symbolic-regression.lisp"
 #+BEGIN_SRC lisp
